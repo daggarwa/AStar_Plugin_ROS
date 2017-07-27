@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/turtlebot_plugin_ws/install
+
+Name: turtlebot_bringup
+Description: Description of turtlebot_bringup
+Version: 2.3.14
+Cflags: 
+Libs: -L/home/turtlebot/turtlebot_plugin_ws/install/lib 
+Requires: 

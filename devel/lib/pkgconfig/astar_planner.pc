@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/turtlebot_plugin_ws/devel
+
+Name: astar_planner
+Description: Description of astar_planner
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/turtlebot/turtlebot_plugin_ws/devel/lib 
+Requires: nav_core pluginlib roscpp rospy std_msgs

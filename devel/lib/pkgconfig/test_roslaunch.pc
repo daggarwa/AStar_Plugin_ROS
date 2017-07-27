@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/turtlebot_plugin_ws/devel
+
+Name: test_roslaunch
+Description: Description of test_roslaunch
+Version: 1.13.0
+Cflags: 
+Libs: -L/home/turtlebot/turtlebot_plugin_ws/devel/lib 
+Requires: 

@@ -1,0 +1,1 @@
+/usr/bin/cc  -fPIC    -shared -Wl,-soname,_roslz4.so -o /home/turtlebot/turtlebot_plugin_ws/devel/lib/python2.7/dist-packages/roslz4/_roslz4.so CMakeFiles/roslz4_py.dir/src/_roslz4module.c.o /home/turtlebot/turtlebot_plugin_ws/devel/lib/libroslz4.so -lpython2.7 -llz4 -Wl,-rpath,/home/turtlebot/turtlebot_plugin_ws/devel/lib: 

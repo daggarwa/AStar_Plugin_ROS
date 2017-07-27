@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC    -shared -Wl,-soname,libastar_planner.so -o /home/turtlebot/turtlebot_plugin_ws/devel/lib/libastar_planner.so CMakeFiles/astar_planner.dir/src/AStarPlanner.cpp.o 

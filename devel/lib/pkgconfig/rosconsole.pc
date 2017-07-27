@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/turtlebot_plugin_ws/devel
+
+Name: rosconsole
+Description: Description of rosconsole
+Version: 1.13.0
+Cflags: -I/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/tools/rosconsole/include -I/usr/include
+Libs: -L/home/turtlebot/turtlebot_plugin_ws/devel/lib -lrosconsole -lrosconsole_log4cxx -lrosconsole_backend_interface -l:/usr/lib/liblog4cxx.so -l:/usr/lib/x86_64-linux-gnu/libboost_regex.so -l:/usr/lib/x86_64-linux-gnu/libboost_system.so -l:/usr/lib/x86_64-linux-gnu/libboost_thread.so -l:/usr/lib/x86_64-linux-gnu/libpthread.so
+Requires: cpp_common rostime

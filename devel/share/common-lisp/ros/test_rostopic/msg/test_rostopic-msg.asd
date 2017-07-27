@@ -1,0 +1,21 @@
+
+(cl:in-package :asdf)
+
+(defsystem "test_rostopic-msg"
+  :depends-on (:roslisp-msg-protocol :roslisp-utils )
+  :components ((:file "_package")
+    (:file "Floats" :depends-on ("_package_Floats"))
+    (:file "_package_Floats" :depends-on ("_package"))
+    (:file "Arrays" :depends-on ("_package_Arrays"))
+    (:file "_package_Arrays" :depends-on ("_package"))
+    (:file "TVals" :depends-on ("_package_TVals"))
+    (:file "_package_TVals" :depends-on ("_package"))
+    (:file "Simple" :depends-on ("_package_Simple"))
+    (:file "_package_Simple" :depends-on ("_package"))
+    (:file "ArrayVal" :depends-on ("_package_ArrayVal"))
+    (:file "_package_ArrayVal" :depends-on ("_package"))
+    (:file "Val" :depends-on ("_package_Val"))
+    (:file "_package_Val" :depends-on ("_package"))
+    (:file "Embed" :depends-on ("_package_Embed"))
+    (:file "_package_Embed" :depends-on ("_package"))
+  ))

@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/turtlebot_plugin_ws/install
+
+Name: rostopic
+Description: Description of rostopic
+Version: 1.13.0
+Cflags: 
+Libs: -L/home/turtlebot/turtlebot_plugin_ws/install/lib 
+Requires: 

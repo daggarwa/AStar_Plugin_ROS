@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/turtlebot_plugin_ws/devel
+
+Name: turtlebot_capabilities
+Description: Description of turtlebot_capabilities
+Version: 2.3.14
+Cflags: 
+Libs: -L/home/turtlebot/turtlebot_plugin_ws/devel/lib 
+Requires: 

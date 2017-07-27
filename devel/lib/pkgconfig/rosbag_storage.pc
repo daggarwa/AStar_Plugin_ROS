@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/turtlebot_plugin_ws/devel
+
+Name: rosbag_storage
+Description: Description of rosbag_storage
+Version: 1.13.0
+Cflags: -I/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/tools/rosbag_storage/include -I/usr/include
+Libs: -L/home/turtlebot/turtlebot_plugin_ws/devel/lib -lrosbag_storage -l:/usr/lib/x86_64-linux-gnu/libconsole_bridge.so -l:/usr/lib/x86_64-linux-gnu/libboost_date_time.so -l:/usr/lib/x86_64-linux-gnu/libboost_filesystem.so -l:/usr/lib/x86_64-linux-gnu/libboost_program_options.so -l:/usr/lib/x86_64-linux-gnu/libboost_regex.so
+Requires: roslz4

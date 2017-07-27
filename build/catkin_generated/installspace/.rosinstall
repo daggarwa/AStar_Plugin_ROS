@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/turtlebot/turtlebot_plugin_ws/install/setup.sh

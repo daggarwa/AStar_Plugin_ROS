@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/turtlebot_plugin_ws/install
+
+Name: relaxed_astar
+Description: Description of relaxed_astar
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/turtlebot/turtlebot_plugin_ws/install/lib 
+Requires: nav_core roscpp rospy std_msgs pluginlib

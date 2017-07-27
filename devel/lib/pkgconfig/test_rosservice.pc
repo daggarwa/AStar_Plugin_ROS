@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/turtlebot_plugin_ws/devel
+
+Name: test_rosservice
+Description: Description of test_rosservice
+Version: 1.13.0
+Cflags: -I/home/turtlebot/turtlebot_plugin_ws/devel/include
+Libs: -L/home/turtlebot/turtlebot_plugin_ws/devel/lib 
+Requires: 

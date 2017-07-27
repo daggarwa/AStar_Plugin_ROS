@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/turtlebot_plugin_ws/install
+
+Name: usb_cam
+Description: Description of usb_cam
+Version: 0.3.4
+Cflags: -I/home/turtlebot/turtlebot_plugin_ws/install/include
+Libs: -L/home/turtlebot/turtlebot_plugin_ws/install/lib -lusb_cam
+Requires: 

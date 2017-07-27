@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/utilities/roslz4/include/roslz4/lz4s.h
+lz4.h
+-
+
+/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/utilities/roslz4/src/lz4s.c
+roslz4/lz4s.h
+/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/utilities/roslz4/src/roslz4/lz4s.h
+xxhash.h
+/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/utilities/roslz4/src/xxhash.h
+stdint.h
+-
+string.h
+-
+stdio.h
+-
+stdlib.h
+-
+
+/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/utilities/roslz4/src/xxhash.c
+xxhash.h
+/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/utilities/roslz4/src/xxhash.h
+stdlib.h
+-
+string.h
+-
+stdint.h
+-
+
+/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/utilities/roslz4/src/xxhash.h
+

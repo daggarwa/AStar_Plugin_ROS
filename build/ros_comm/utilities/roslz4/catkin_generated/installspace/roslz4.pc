@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/turtlebot_plugin_ws/install
+
+Name: roslz4
+Description: Description of roslz4
+Version: 1.13.0
+Cflags: -I/home/turtlebot/turtlebot_plugin_ws/install/include -I/usr/include
+Libs: -L/home/turtlebot/turtlebot_plugin_ws/install/lib -lroslz4 -l:/usr/lib/x86_64-linux-gnu/liblz4.so
+Requires: 

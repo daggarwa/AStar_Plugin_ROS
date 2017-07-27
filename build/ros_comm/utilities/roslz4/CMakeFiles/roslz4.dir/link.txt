@@ -1,0 +1,1 @@
+/usr/bin/cc  -fPIC    -shared -Wl,-soname,libroslz4.so -o /home/turtlebot/turtlebot_plugin_ws/devel/lib/libroslz4.so CMakeFiles/roslz4.dir/src/lz4s.c.o CMakeFiles/roslz4.dir/src/xxhash.c.o -llz4 

@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/tools/rosconsole/include/ros/console_backend.h
+
+/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/tools/rosconsole/src/rosconsole/rosconsole_backend.cpp
+ros/console_backend.h
+/home/turtlebot/turtlebot_plugin_ws/src/ros_comm/tools/rosconsole/src/rosconsole/ros/console_backend.h
+

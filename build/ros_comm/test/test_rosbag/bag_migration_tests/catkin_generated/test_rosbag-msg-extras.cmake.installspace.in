@@ -1,0 +1,2 @@
+set(test_rosbag_MESSAGE_FILES "msg_current/Constants.msg;msg_current/Converged.msg;msg_current/MigratedAddSub.msg;msg_current/MigratedExplicit.msg;msg_current/MigratedImplicit.msg;msg_current/MigratedMixed.msg;msg_current/PartiallyMigrated.msg;msg_current/Renamed4.msg;msg_current/Simple.msg;msg_current/SimpleMigrated.msg;msg_current/SubUnmigrated.msg;msg_current/Unmigrated.msg")
+set(test_rosbag_SERVICE_FILES "")
