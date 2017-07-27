@@ -1,16 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <fstream>
-#include <iostream>
-#include <iomanip>
-#include <string>
-
 #include "AStarPlanner.h"
 #include <pluginlib/class_loader.h>
 #include <pluginlib/class_list_macros.h>
@@ -20,31 +7,13 @@ PLUGINLIB_EXPORT_CLASS(astar_plugin::AStarPlanner, nav_core::BaseGlobalPlanner)
 
 int value;
 int mapSize;
-bool *OGM;
-static const float INFINIT_COST = INT_MAX; //!< cost of non connected nodes
+bool *occupancyGridMap;
+
+//cost of non connected nodes
 float infinity = std::numeric_limits<float>::infinity();
-float tBreak; // coefficient for breaking ties
-//ofstream MyExcelFile("RA_result.xlsx", ios::trunc);
 
-int clock_gettime(clockid_t clk_id, struct timespect *tp);
-
-timespec diff(timespec start_time, timespec end_time)
-{
-  timespec temp;
-  if ((end_time.tv_nsec - start_time.tv_nsec) < 0)
-  {
-    temp.tv_sec = end_time.tv_sec - start_time.tv_sec - 1;
-    temp.tv_nsec = 1000000000 + end_time.tv_nsec - start_time.tv_nsec;
-  }
-  else
-  {
-    temp.tv_sec = end_time.tv_sec - start_time.tv_sec;
-    temp.tv_nsec = end_time.tv_nsec - start_time.tv_nsec;
-  }
-  return temp;
-}
-
-//inline vector<int> findFreeNeighborGridSquare(int CellID);
+// coefficient for breaking ties
+float tBreak;
 
 namespace astar_plugin
 {
@@ -53,16 +22,22 @@ namespace astar_plugin
 AStarPlanner::AStarPlanner()
 {
 }
+
+/**
+  Constructor with shared node handle
+**/
 AStarPlanner::AStarPlanner(ros::NodeHandle &nh)
 {
   ROSNodeHandle = nh;
 }
 
+/**
+  Constructor that initilizes costmap and other parameters
+**/
 AStarPlanner::AStarPlanner(std::string name, costmap_2d::Costmap2DROS *costmap_ros)
 {
   initialize(name, costmap_ros);
 }
-
 
 /**
 Implementation of method from BaseGlobalPlanner interface that
@@ -90,21 +65,19 @@ void AStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS *costma
     tBreak = 1 + 1 / (mapSize);
     value = 0;
 
-    OGM = new bool[mapSize];
+    occupancyGridMap = new bool[mapSize];
     for (unsigned int iy = 0; iy < costmap_->getSizeInCellsY(); iy++)
     {
       for (unsigned int ix = 0; ix < costmap_->getSizeInCellsX(); ix++)
       {
         unsigned int cost = static_cast<int>(costmap_->getCost(ix, iy));
-        
+
         if (cost == 0)
-          OGM[iy * width + ix] = true;
+          occupancyGridMap[iy * width + ix] = true;
         else
-          OGM[iy * width + ix] = false;
+          occupancyGridMap[iy * width + ix] = false;
       }
     }
-
-    //MyExcelFile << "StartID\tStartX\tStartY\tGoalID\tGoalX\tGoalY\tPlannertime(ms)\tpathLength\tnumberOfCells\t" << endl;
 
     ROS_INFO("AStar planner initialized.");
     initialized_ = true;
@@ -112,7 +85,6 @@ void AStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS *costma
   else
     ROS_WARN("This planner has already been initialized... doing nothing");
 }
-
 
 /**
   Implementation of method from BaseGlobalPlanner interface that calculates
@@ -140,12 +112,6 @@ bool AStarPlanner::makePlan(const geometry_msgs::PoseStamped &start, const geome
     return false;
   }
 
-  //tf::Stamped<tf::Pose> goal_tf;
-  //tf::Stamped<tf::Pose> start_tf;
-
-  //poseStampedMsgToTF(goal, goal_tf);
-  //poseStampedMsgToTF(start, start_tf);
-
   // convert the start and goal positions
 
   float startX = start.pose.position.x;
@@ -166,8 +132,6 @@ bool AStarPlanner::makePlan(const geometry_msgs::PoseStamped &start, const geome
     startGridSquare = getGridSquareIndex(startX, startY);
 
     goalGridSquare = getGridSquareIndex(goalX, goalY);
-
-    //MyExcelFile << startGridSquare << "\t" << start.pose.position.x << "\t" << start.pose.position.y << "\t" << goalGridSquare << "\t" << goal.pose.position.x << "\t" << goal.pose.position.y;
   }
   else
   {
@@ -175,7 +139,6 @@ bool AStarPlanner::makePlan(const geometry_msgs::PoseStamped &start, const geome
     return false;
   }
 
-  
   // call global planner
 
   if (isStartAndGoalValid(startGridSquare, goalGridSquare))
@@ -198,33 +161,28 @@ bool AStarPlanner::makePlan(const geometry_msgs::PoseStamped &start, const geome
         float x = 0.0;
         float y = 0.0;
 
-        float previous_x=0.0;
-        float previous_y=0.0;
-               
+        float previous_x = 0.0;
+        float previous_y = 0.0;
 
         int index = bestPath[i];
         int previous_index;
         getGridSquareIndices(index, x, y);
 
-        if(i!=0)
+        if (i != 0)
         {
-          previous_index=bestPath[i-1];
-
-          
+          previous_index = bestPath[i - 1];
         }
         else
         {
-          previous_index=index;
-
+          previous_index = index;
         }
 
-        getGridSquareIndices(previous_index,previous_x,previous_y);
-        tf::Vector3 vectorToTarget;
-        vectorToTarget.setValue(x-previous_x, y-previous_y, 0.0);
+        getGridSquareIndices(previous_index, previous_x, previous_y);
 
-              
-        float angle = atan2((double)vectorToTarget.y(),(double) vectorToTarget.x()) ;
-        ROS_INFO("angle: %f",angle);
+        //Orient the bot towards target
+        tf::Vector3 vectorToTarget;
+        vectorToTarget.setValue(x - previous_x, y - previous_y, 0.0);
+        float angle = atan2((double)vectorToTarget.y(), (double)vectorToTarget.x());
 
         geometry_msgs::PoseStamped pose = goal;
 
@@ -232,31 +190,10 @@ bool AStarPlanner::makePlan(const geometry_msgs::PoseStamped &start, const geome
         pose.pose.position.y = y;
         pose.pose.position.z = 0.0;
 
-        pose.pose.orientation= tf::createQuaternionMsgFromYaw(angle);
-       // pose.pose.orientation.x = 0.0;
-       // pose.pose.orientation.y = 0.0;
-       // pose.pose.orientation.z = 0.0;
-       // pose.pose.orientation.w = 1.0;
+        pose.pose.orientation = tf::createQuaternionMsgFromYaw(angle);
 
         plan.push_back(pose);
       }
-
-      float path_length = 0.0;
-
-      std::vector<geometry_msgs::PoseStamped>::iterator it = plan.begin();
-
-      geometry_msgs::PoseStamped last_pose;
-      last_pose = *it;
-      it++;
-      for (; it != plan.end(); ++it)
-      {
-        path_length += hypot((*it).pose.position.x - last_pose.pose.position.x,
-                             (*it).pose.position.y - last_pose.pose.position.y);
-        last_pose = *it;
-      }
-      cout << "The global path length: " << path_length << " meters" << endl;
-      //MyExcelFile << "\t" << path_length << "\t" << plan.size() << endl;
-      //publish the plan
 
       return true;
     }
@@ -274,6 +211,10 @@ bool AStarPlanner::makePlan(const geometry_msgs::PoseStamped &start, const geome
     return false;
   }
 }
+
+/**
+  Function to adjust start and goal w.r.t origin point on map
+**/
 void AStarPlanner::convertToMapCoordinates(float &x, float &y)
 {
 
@@ -281,6 +222,9 @@ void AStarPlanner::convertToMapCoordinates(float &x, float &y)
   y = y - originY;
 }
 
+/**
+  Function to get index of grid square on map given square coordinates
+**/
 int AStarPlanner::getGridSquareIndex(float x, float y)
 {
 
@@ -289,12 +233,15 @@ int AStarPlanner::getGridSquareIndex(float x, float y)
   float newX = x / (resolution);
   float newY = y / (resolution);
 
-  
   gridSquare = calculateGridSquareIndex(newY, newX);
 
   return gridSquare;
 }
 
+/**
+  Function to get gridSquare coordinates given index
+  
+**/
 void AStarPlanner::getGridSquareIndices(int index, float &x, float &y)
 {
 
@@ -306,6 +253,10 @@ void AStarPlanner::getGridSquareIndices(int index, float &x, float &y)
   y = y + originY;
 }
 
+/**
+  Function to check if gridSquare coordinates are in map bounds
+  
+**/
 bool AStarPlanner::isCoordinateInBounds(float x, float y)
 {
   bool valid = true;
@@ -315,7 +266,6 @@ bool AStarPlanner::isCoordinateInBounds(float x, float y)
 
   return valid;
 }
-
 
 /**
   Function runs the A* algorithm to find best path to goal on grid
@@ -331,88 +281,73 @@ vector<int> AStarPlanner::runAStarOnGrid(int startGridSquare, int goalGridSquare
   for (uint i = 0; i < mapSize; i++)
     g_score[i] = infinity;
 
-  timespec time1, time2;
-  /* take current time here */
-  clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time1);
-
   bestPath = findPath(startGridSquare, goalGridSquare, g_score);
-
-  clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
-
-  //cout << "time to generate best global path by Relaxed A* = " << (diff(time1, time2).tv_sec) * 1e3 + (diff(time1, time2).tv_nsec) * 1e-6 << " microseconds" << endl;
-
-  //MyExcelFile << "\t" << (diff(time1, time2).tv_sec) * 1e3 + (diff(time1, time2).tv_nsec) * 1e-6;
 
   return bestPath;
 }
 
-/*******************************************************************************/
-//Function Name: findPath
-//Inputs: the map layout, the start and the goal gridSquares and a boolean to indicate if we will use break ties or not
-//Output: the best path
-//Description: it is used to generate the robot free path
-/*********************************************************************************/
-
 /**
+
+  Generates the path for the bot towards the goal
+
 **/
 vector<int> AStarPlanner::findPath(int startGridSquare, int goalGridSquare, float g_score[])
 {
   value++;
   vector<int> bestPath;
   vector<int> emptyPath;
-  GridSquare CP;
+  GridSquare gridSq;
 
-  multiset<GridSquare> OPL;
+  multiset<GridSquare> openSquaresList;
   int currentGridSquare;
 
   //calculate g_score and f_score of the start position
   g_score[startGridSquare] = 0;
-  CP.currentGridSquare = startGridSquare;
-  CP.fCost = g_score[startGridSquare] + calculateHCost(startGridSquare, goalGridSquare);
+  gridSq.currentGridSquare = startGridSquare;
+  gridSq.fCost = g_score[startGridSquare] + calculateFScore(startGridSquare, goalGridSquare);
 
   //add the start gridSquare to the open list
-  OPL.insert(CP);
+  openSquaresList.insert(gridSq);
   currentGridSquare = startGridSquare;
 
-  //while the open list is not empty continue the search or g_score(goalGridSquare) is equal to infinity
-  while (!OPL.empty() && g_score[goalGridSquare] == infinity)
+  //while the open list is not empty and till goal square is reached continue the search
+  while (!openSquaresList.empty() && g_score[goalGridSquare] == infinity)
   {
-    //choose the gridSquare that has the lowest cost fCost in the open set which is the begin of the multiset
-    currentGridSquare = OPL.begin()->currentGridSquare;
-    //remove the currentgridSquare from the openList
-    OPL.erase(OPL.begin());
-    //search the neighbors of the current gridSquare
+    //choose the gridSquare that has the lowest cost fCost in the open set
+    currentGridSquare = openSquaresList.begin()->currentGridSquare;
+    //remove that gridSquare from the openList
+    openSquaresList.erase(openSquaresList.begin());
+    //search the neighbors of that gridSquare
     vector<int> neighborGridSquares;
     neighborGridSquares = findFreeNeighborGridSquare(currentGridSquare);
-    for (uint i = 0; i < neighborGridSquares.size(); i++) //for each neighbor v of current gridSquare
+    for (uint i = 0; i < neighborGridSquares.size(); i++) //for each neighbor v of gridSquare
     {
       // if the g_score of the neighbor is equal to INF: unvisited gridSquare
       if (g_score[neighborGridSquares[i]] == infinity)
       {
         g_score[neighborGridSquares[i]] = g_score[currentGridSquare] + getMoveCost(currentGridSquare, neighborGridSquares[i]);
-        addNeighborGridSquareToOpenList(OPL, neighborGridSquares[i], goalGridSquare, g_score);
-      } //end if
-    }   //end for
-  }     //end while
+        addNeighborGridSquareToOpenList(openSquaresList, neighborGridSquares[i], goalGridSquare, g_score);
+      }
+    }
+  }
 
-  if (g_score[goalGridSquare] != infinity) // if g_score(goalGridSquare)==INF : construct path
+  if (g_score[goalGridSquare] != infinity) // if goal gridSquare has been reached
   {
     bestPath = constructPath(startGridSquare, goalGridSquare, g_score);
     return bestPath;
   }
   else
   {
-    cout << "Failure to find a path !" << endl;
+    ROS_INFO("Failure to find a path !");
     return emptyPath;
   }
 }
 
-/*******************************************************************************/
-//Function Name: constructPath
-//Inputs: the start and the goal gridSquares
-//Output: the best path
-//Description: it is used to construct the robot path
-/*********************************************************************************/
+/**
+  Function constructs the path found by findPath function by returning vector of
+  gridSquare indices that lie on path.
+
+**/
 vector<int> AStarPlanner::constructPath(int startGridSquare, int goalGridSquare, float g_score[])
 {
   vector<int> bestPath;
@@ -442,28 +377,20 @@ vector<int> AStarPlanner::constructPath(int startGridSquare, int goalGridSquare,
   return bestPath;
 }
 
-
-//Function Name: addNeighborGridSquareToOpenList
-//Inputs: the open list, the neighbors gridSquare, the g_score matrix, the goal gridSquare
-//Output:
-//Description: it is used to add a neighbor gridSquare to the open list
-/*********************************************************************************/
-void AStarPlanner::addNeighborGridSquareToOpenList(multiset<GridSquare> &OPL, int neighborGridSquare, int goalGridSquare, float g_score[])
+/**
+  Helper function to add unexplored neighbours of currentGridSquare to openlist
+**/
+void AStarPlanner::addNeighborGridSquareToOpenList(multiset<GridSquare> &openSquaresList, int neighborGridSquare, int goalGridSquare, float g_score[])
 {
-  GridSquare CP;
-  CP.currentGridSquare = neighborGridSquare; //insert the neighborGridSquare
-  CP.fCost = g_score[neighborGridSquare] + calculateHCost(neighborGridSquare, goalGridSquare);
-  OPL.insert(CP);
-
+  GridSquare gridSq;
+  gridSq.currentGridSquare = neighborGridSquare; //insert the neighborGridSquare
+  gridSq.fCost = g_score[neighborGridSquare] + calculateFScore(neighborGridSquare, goalGridSquare);
+  openSquaresList.insert(gridSq);
 }
 
-/*******************************************************************************
- * Function Name: findFreeNeighborGridSquare
- * Inputs: the row and columun of the current GridSquare
- * Output: a vector of free neighbor gridSquares of the current gridSquare
- * Description:it is used to find the free neighbors gridSquares of a the current gridSquares in the grid
- 
-*********************************************************************************/
+/**
+  Helper function to find free neighbours of currentGridSquare 
+**/
 
 vector<int> AStarPlanner::findFreeNeighborGridSquare(int gridSquare)
 {
@@ -478,8 +405,9 @@ vector<int> AStarPlanner::findFreeNeighborGridSquare(int gridSquare)
     {
       //check whether the index is valid
       if ((rowID + i >= 0) && (rowID + i < height) && (colID + j >= 0) && (colID + j < width) && (!(i == 0 && j == 0)))
-      {   neighborIndex= ((rowID + i )* width)+(colID + j);
-        //neighborIndex = getCellIndex(rowID + i, colID + j);
+      {
+        neighborIndex = ((rowID + i) * width) + (colID + j);
+
         if (isFree(neighborIndex))
           freeNeighborGridSquares.push_back(neighborIndex);
       }
@@ -487,12 +415,9 @@ vector<int> AStarPlanner::findFreeNeighborGridSquare(int gridSquare)
   return freeNeighborGridSquares;
 }
 
-/*******************************************************************************/
-//Function Name: isStartAndGoalValid
-//Inputs: the start and Goal gridSquares
-//Output: true if the start and the goal gridSquares are valid
-//Description: check if the start and goal gridSquare are valid
-/*********************************************************************************/
+/**
+  Checks if start and goal positions are valid and not unreachable.
+**/
 bool AStarPlanner::isStartAndGoalValid(int startGridSquare, int goalGridSquare)
 {
   bool isvalid = true;
@@ -500,42 +425,42 @@ bool AStarPlanner::isStartAndGoalValid(int startGridSquare, int goalGridSquare)
   bool isFreeGoalGridSquare = isFree(goalGridSquare);
   if (startGridSquare == goalGridSquare)
   {
-    
+
     isvalid = false;
   }
   else
   {
     if (!isFreeStartGridSquare && !isFreeGoalGridSquare)
     {
-      
+
       isvalid = false;
     }
     else
     {
       if (!isFreeStartGridSquare)
       {
-        
+
         isvalid = false;
       }
       else
       {
         if (!isFreeGoalGridSquare)
         {
-          
+
           isvalid = false;
         }
         else
         {
           if (findFreeNeighborGridSquare(goalGridSquare).size() == 0)
           {
-            
+
             isvalid = false;
           }
           else
           {
             if (findFreeNeighborGridSquare(startGridSquare).size() == 0)
             {
-              
+
               isvalid = false;
             }
           }
@@ -546,13 +471,17 @@ bool AStarPlanner::isStartAndGoalValid(int startGridSquare, int goalGridSquare)
   return isvalid;
 }
 
+/**
+  Helper function to calculate cost of moving from currentGridSquare to neighbour
+
+**/
 float AStarPlanner::getMoveCost(int i1, int j1, int i2, int j2)
 {
-  float moveCost = INFINIT_COST; //start cost with maximum value. Change it to real cost of gridSquares are connected
+  float moveCost = infinity; //start cost with maximum value. Change it to real cost of gridSquares are connected
   //if gridSquare(i2,j2) exists in the diagonal of gridSquare(i1,j1)
   if ((j2 == j1 + 1 && i2 == i1 + 1) || (i2 == i1 - 1 && j2 == j1 + 1) || (i2 == i1 - 1 && j2 == j1 - 1) || (j2 == j1 - 1 && i2 == i1 + 1))
   {
-    
+
     moveCost = 1.4;
   }
   //if gridSquare(i2,j2) exists in the horizontal or vertical line with gridSquare(i1,j1)
@@ -560,13 +489,17 @@ float AStarPlanner::getMoveCost(int i1, int j1, int i2, int j2)
   {
     if ((j2 == j1 && i2 == i1 - 1) || (i2 == i1 && j2 == j1 - 1) || (i2 == i1 + 1 && j2 == j1) || (i1 == i2 && j2 == j1 + 1))
     {
-      
+
       moveCost = 1;
     }
   }
   return moveCost;
 }
 
+/**
+  Wrapper function to calculate cost of moving from currentGridSquare to neighbour
+
+**/
 float AStarPlanner::getMoveCost(int gridSquareID1, int gridSquareID2)
 {
   int i1 = 0, i2 = 0, j1 = 0, j2 = 0;
@@ -579,18 +512,66 @@ float AStarPlanner::getMoveCost(int gridSquareID1, int gridSquareID2)
   return getMoveCost(i1, j1, i2, j2);
 }
 
-//verify if the gridSquare(i,j) is free
-bool AStarPlanner::isFree(int i, int j)
-{ 
-  int gridSquareID=(i*width)+j;
-  //int GridSquareID = getCellIndex(i, j);
-  return OGM[gridSquareID];
+/**
+
+**/
+float AStarPlanner::calculateFScore(int gridSquareID, int goalGridSquare)
+{
+  int x1 = getGridSquareRowID(goalGridSquare);
+  int y1 = getGridSquareColID(goalGridSquare);
+  int x2 = getGridSquareRowID(gridSquareID);
+  int y2 = getGridSquareColID(gridSquareID);
+  return abs(x1 - x2) + abs(y1 - y2);
 }
 
-//verify if the gridSquare(i,j) is free
+/**
+  Calculates the gridSquare index from square coordinates
+**/
+int AStarPlanner::calculateGridSquareIndex(int i, int j) 
+{
+  return (i * width) + j;
+}
+
+/**
+
+  Calculates gridSquare row from square index
+
+**/
+int AStarPlanner::getGridSquareRowID(int index) //get the row ID from gridSquare index
+{
+  return index / width;
+}
+
+/**
+
+  Calculates gridSquare column from square index
+
+**/
+int AStarPlanner::getGridSquareColID(int index) //get column ID from gridSquare index
+{
+  return index % width;
+}
+
+/**
+
+  Checks if gridSquare at (i,j) is free
+
+**/
+bool AStarPlanner::isFree(int i, int j)
+{
+  int gridSquareID = (i * width) + j;
+
+  return occupancyGridMap[gridSquareID];
+}
+
+/**
+
+  Checks if gridSquare at index gridSquareID is free
+
+**/
 bool AStarPlanner::isFree(int gridSquareID)
 {
-  return OGM[gridSquareID];
+  return occupancyGridMap[gridSquareID];
 }
 };
 
