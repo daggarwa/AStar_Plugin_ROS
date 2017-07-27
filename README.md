@@ -11,7 +11,7 @@ Follow steps below to run the plugin on the system:
    
 2. Clone the repository to your desktop
 
-3. roscd to turtlebot_navigation package. Add following line in your move_base.launch.xml file under launch/includes(you may need to  sudo): param name="base_global_planner" value="astar_plugin/AStarPlanner"/
+3. roscd to turtlebot_navigation package. Add following line in your move_base.launch.xml file under launch/includes(you may need to  sudo): \<param name="base_global_planner" value="astar_plugin/AStarPlanner"/\>
      
 4. Copy the files in map folder under astar_planner ros package from the cloned reposiory to the path below:
 
@@ -27,9 +27,9 @@ NOTE: Sometimes error can come while launching turtlebot_stage due to incorrect 
 "opt/ros/indigo/share/turtlebot_navigation/launch/includes/amcl.launch.xml: Invalid roslaunch XML syntax: [Errno 2] No such file or directory: u'/opt/ros/indigo/share/turtlebot_navigation/launch/includes/amcl.launch.xml'"
 
 For this we have to open turtlebot_in_stage.launch from turtlebot package (might require sudo) and changing the following :
-include file="$(find turtlebot_navigation)/launch/includes/amcl.launch.xml" 
-to: include file="$(find turtlebot_navigation)/launch/includes/amcl/amcl.launch.xml"
+\<include file="$(find turtlebot_navigation)/launch/includes/amcl.launch.xml" \>
+to: \<include file="$(find turtlebot_navigation)/launch/includes/amcl/amcl.launch.xml"\>
 
 or  even this:
-arg name="custom_amcl_launch_file" default="$(find turtlebot_navigation)/launch/includes/amcl/$(arg 3d_sensor)_amcl.launch.xml"/ 
-include file="$(arg custom_amcl_launch_file)"
+\<arg name="custom_amcl_launch_file" default="$(find turtlebot_navigation)/launch/includes/amcl/$(arg 3d_sensor)_amcl.launch.xml"/ \>
+\<include file="$(arg custom_amcl_launch_file)"\>
