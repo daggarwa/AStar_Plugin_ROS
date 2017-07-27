@@ -15,7 +15,7 @@ Follow steps below to run the plugin on the system:
      
 4. Copy the files in map folder under astar_planner ros package from the cloned reposiory to the path below:
 
-     /opt/ros/<distro>/share/turtlebot_stage/maps
+     /opt/ros/\<distro\>/share/turtlebot_stage/maps
      
 5. Type the following to launch stage and rviz with loaded map and turtlebot:
     
