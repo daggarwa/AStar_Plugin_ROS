@@ -166,7 +166,7 @@ bool AStarPlanner::makePlan(const geometry_msgs::PoseStamped &start, const geome
 
         int index = bestPath[i];
         int previous_index;
-        getGridSquareIndices(index, x, y);
+        getGridSquareCoordinates(index, x, y);
 
         if (i != 0)
         {
@@ -177,7 +177,7 @@ bool AStarPlanner::makePlan(const geometry_msgs::PoseStamped &start, const geome
           previous_index = index;
         }
 
-        getGridSquareIndices(previous_index, previous_x, previous_y);
+        getGridSquareCoordinates(previous_index, previous_x, previous_y);
 
         //Orient the bot towards target
         tf::Vector3 vectorToTarget;
@@ -242,12 +242,12 @@ int AStarPlanner::getGridSquareIndex(float x, float y)
   Function to get gridSquare coordinates given index
   
 **/
-void AStarPlanner::getGridSquareIndices(int index, float &x, float &y)
+void AStarPlanner::getGridSquareCoordinates(int index, float &x, float &y)
 {
 
-  x = getGridSquareColID(index) * resolution;
+  x = getGridSquareColIndex(index) * resolution;
 
-  y = getGridSquareRowID(index) * resolution;
+  y = getGridSquareRowIndex(index) * resolution;
 
   x = x + originX;
   y = y + originY;
@@ -304,7 +304,7 @@ vector<int> AStarPlanner::findPath(int startGridSquare, int goalGridSquare, floa
   //calculate g_score and f_score of the start position
   g_score[startGridSquare] = 0;
   gridSq.currentGridSquare = startGridSquare;
-  gridSq.fCost = g_score[startGridSquare] + calculateFScore(startGridSquare, goalGridSquare);
+  gridSq.fCost = g_score[startGridSquare] + calculateHScore(startGridSquare, goalGridSquare);
 
   //add the start gridSquare to the open list
   openSquaresList.insert(gridSq);
@@ -384,7 +384,7 @@ void AStarPlanner::addNeighborGridSquareToOpenList(multiset<GridSquare> &openSqu
 {
   GridSquare gridSq;
   gridSq.currentGridSquare = neighborGridSquare; //insert the neighborGridSquare
-  gridSq.fCost = g_score[neighborGridSquare] + calculateFScore(neighborGridSquare, goalGridSquare);
+  gridSq.fCost = g_score[neighborGridSquare] + calculateHScore(neighborGridSquare, goalGridSquare);
   openSquaresList.insert(gridSq);
 }
 
@@ -395,8 +395,8 @@ void AStarPlanner::addNeighborGridSquareToOpenList(multiset<GridSquare> &openSqu
 vector<int> AStarPlanner::findFreeNeighborGridSquare(int gridSquare)
 {
 
-  int rowID = getGridSquareRowID(gridSquare);
-  int colID = getGridSquareColID(gridSquare);
+  int rowIndex = getGridSquareRowIndex(gridSquare);
+  int colIndex = getGridSquareColIndex(gridSquare);
   int neighborIndex;
   vector<int> freeNeighborGridSquares;
 
@@ -404,9 +404,9 @@ vector<int> AStarPlanner::findFreeNeighborGridSquare(int gridSquare)
     for (int j = -1; j <= 1; j++)
     {
       //check whether the index is valid
-      if ((rowID + i >= 0) && (rowID + i < height) && (colID + j >= 0) && (colID + j < width) && (!(i == 0 && j == 0)))
+      if ((rowIndex + i >= 0) && (rowIndex + i < height) && (colIndex + j >= 0) && (colIndex + j < width) && (!(i == 0 && j == 0)))
       {
-        neighborIndex = ((rowID + i) * width) + (colID + j);
+        neighborIndex = ((rowIndex + i) * width) + (colIndex + j);
 
         if (isFree(neighborIndex))
           freeNeighborGridSquares.push_back(neighborIndex);
@@ -500,14 +500,14 @@ float AStarPlanner::getMoveCost(int i1, int j1, int i2, int j2)
   Wrapper function to calculate cost of moving from currentGridSquare to neighbour
 
 **/
-float AStarPlanner::getMoveCost(int gridSquareID1, int gridSquareID2)
+float AStarPlanner::getMoveCost(int gridSquareIndex1, int gridSquareIndex2)
 {
   int i1 = 0, i2 = 0, j1 = 0, j2 = 0;
 
-  i1 = getGridSquareRowID(gridSquareID1);
-  j1 = getGridSquareColID(gridSquareID1);
-  i2 = getGridSquareRowID(gridSquareID2);
-  j2 = getGridSquareColID(gridSquareID2);
+  i1 = getGridSquareRowIndex(gridSquareIndex1);
+  j1 = getGridSquareColIndex(gridSquareIndex1);
+  i2 = getGridSquareRowIndex(gridSquareIndex2);
+  j2 = getGridSquareColIndex(gridSquareIndex2);
 
   return getMoveCost(i1, j1, i2, j2);
 }
@@ -515,12 +515,12 @@ float AStarPlanner::getMoveCost(int gridSquareID1, int gridSquareID2)
 /**
 
 **/
-float AStarPlanner::calculateFScore(int gridSquareID, int goalGridSquare)
+float AStarPlanner::calculateHScore(int gridSquareIndex, int goalGridSquare)
 {
-  int x1 = getGridSquareRowID(goalGridSquare);
-  int y1 = getGridSquareColID(goalGridSquare);
-  int x2 = getGridSquareRowID(gridSquareID);
-  int y2 = getGridSquareColID(gridSquareID);
+  int x1 = getGridSquareRowIndex(goalGridSquare);
+  int y1 = getGridSquareColIndex(goalGridSquare);
+  int x2 = getGridSquareRowIndex(gridSquareIndex);
+  int y2 = getGridSquareColIndex(gridSquareIndex);
   return abs(x1 - x2) + abs(y1 - y2);
 }
 
@@ -537,7 +537,7 @@ int AStarPlanner::calculateGridSquareIndex(int i, int j)
   Calculates gridSquare row from square index
 
 **/
-int AStarPlanner::getGridSquareRowID(int index) //get the row ID from gridSquare index
+int AStarPlanner::getGridSquareRowIndex(int index) //get the row index from gridSquare index
 {
   return index / width;
 }
@@ -547,7 +547,7 @@ int AStarPlanner::getGridSquareRowID(int index) //get the row ID from gridSquare
   Calculates gridSquare column from square index
 
 **/
-int AStarPlanner::getGridSquareColID(int index) //get column ID from gridSquare index
+int AStarPlanner::getGridSquareColIndex(int index) //get column index from gridSquare index
 {
   return index % width;
 }
@@ -559,19 +559,19 @@ int AStarPlanner::getGridSquareColID(int index) //get column ID from gridSquare 
 **/
 bool AStarPlanner::isFree(int i, int j)
 {
-  int gridSquareID = (i * width) + j;
+  int gridSquareIndex = (i * width) + j;
 
-  return occupancyGridMap[gridSquareID];
+  return occupancyGridMap[gridSquareIndex];
 }
 
 /**
 
-  Checks if gridSquare at index gridSquareID is free
+  Checks if gridSquare at index gridSquareIndex is free
 
 **/
-bool AStarPlanner::isFree(int gridSquareID)
+bool AStarPlanner::isFree(int gridSquareIndex)
 {
-  return occupancyGridMap[gridSquareID];
+  return occupancyGridMap[gridSquareIndex];
 }
 };
 

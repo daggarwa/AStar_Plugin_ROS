@@ -58,21 +58,21 @@ public:
   /** Helper methods**/
   void convertToMapCoordinates(float &x, float &y);
   int getGridSquareIndex(float x, float y);
-  void getGridSquareIndices(int index, float &x, float &y);
+  void getGridSquareCoordinates(int index, float &x, float &y);
   bool isCoordinateInBounds(float x, float y);
   vector<int> runAStarOnGrid(int startGridSquare, int goalGridSquare);
   vector<int> findPath(int startGridSquare, int goalGridSquare, float g_score[]);
   vector<int> constructPath(int startGridSquare, int goalGridSquare, float g_score[]);
   void addNeighborGridSquareToOpenList(multiset<GridSquare> &OPL, int neighborGridSquare, int goalGridSquare, float g_score[]);
-  vector<int> findFreeNeighborGridSquare(int gridSquareID);
+  vector<int> findFreeNeighborGridSquare(int gridSquareIndex);
   bool isStartAndGoalValid(int startGridSquare, int goalGridSquare);
-  float getMoveCost(int gridSquareID1, int gridSquareID2);
+  float getMoveCost(int gridSquareIndex1, int gridSquareIndex2);
   float getMoveCost(int i1, int j1, int i2, int j2);
-  float calculateFScore(int gridSquareID, int goalGridSquare);
+  float calculateHScore(int gridSquareIndex, int goalGridSquare);
   int calculateGridSquareIndex(int i, int j);
-  int getGridSquareRowID(int index);
-  int getGridSquareColID(int index);
-  bool isFree(int gridSquareID); 
+  int getGridSquareRowIndex(int index);
+  int getGridSquareColIndex(int index);
+  bool isFree(int gridSquareIndex); 
   bool isFree(int i, int j);
   
 };
