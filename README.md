@@ -11,9 +11,9 @@ Follow steps below to run the plugin on the system:
    
 2. Clone the repository to your desktop
 
-3. roscd to turtlebot_navigation. Add following line in your move_base.launch.xml file under launch/includes(you may need to  sudo):
+3. roscd to turtlebot_navigation. Add following line in your move_base.launch.xml file under launch/includes(you may need to  sudo): <param name="base_global_planner" value="astar_plugin/AStarPlanner"/>
 
-      <<param name="base_global_planner" value="astar_plugin/AStarPlanner"/>>
+     
 
 4. Type the following to launch stage and rviz with loaded map and turtlebot:
     
